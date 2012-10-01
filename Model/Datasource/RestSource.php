@@ -1,7 +1,7 @@
 <?php
 class RestSource extends DataSource {
 	public $description = 'Rest Source';
-
+	public $headers = array();
 	/**
 	* Execute a custom query against the REST server
 	*
@@ -28,7 +28,8 @@ class RestSource extends DataSource {
 		}
 
 		$url = sprintf('/%s/%s', $model->remoteResource, $config['action']);
-		$cu = new Curl($this->getBaseUrl() . $url);
+
+		$cu = new \Nodes\Curl($this->getBaseUrl() . $url);
 		$this->applyConfiguration($cu);
 
 		$data = null;
@@ -48,16 +49,19 @@ class RestSource extends DataSource {
 	* @return mixed
 	*/
 	public function create(Model $model, $fields = null, $values = null) {
-		$data = array_combine($fields, $values);
-		if (empty($data['id']) && $this->read($model, array('conditions' => array('id' => $data['id']))))  {
-			$url	= sprintf('/%s', $model->remoteResource);
-			$method = 'post';
-		} else {
+		$method = 'post';
+		$url	= sprintf('/%s', $model->remoteResource);
+		if(!empty($data['id'])) {
 			$url = sprintf('/%s/%s', $model->remoteResource, $data['id']);
 			$method = 'put';
 		}
 
-		$cu = new Curl($this->getBaseUrl() . $url);
+		$data = array();
+		if (!empty($fields) && !empty($values)) {
+			$data = array_combine($fields, $values);
+		}
+
+		$cu = new \Nodes\Curl($this->getBaseUrl() . $url);
 		$this->applyConfiguration($cu);
 
 		return call_user_func(array($cu, $method), $data);
@@ -82,7 +86,9 @@ class RestSource extends DataSource {
 			unset($queryData['conditions']['id']);
 		}
 
- 		$url = trim($url, DS) . '.' . $this->config['format'];
+		if (!empty($this->config['format'])) {
+			$url = trim($url, DS) . '.' . $this->config['format'];
+		}
 
 		if (!empty($queryData['limit'])) {
 			$queryData['conditions']['limit'] = $queryData['limit'];
@@ -128,7 +134,7 @@ class RestSource extends DataSource {
 	public function update(Model $model, $fields = array(), $values = null, $conditions = null) {
 		$data	= array_combine($fields, $values);
 		$url	= sprintf('/%s', $model->remoteResource);
-		$cu		= new Curl($this->getBaseUrl() . $url);
+		$cu		= new \Nodes\Curl($this->getBaseUrl() . $url);
 		$this->applyConfiguration($cu);
 
 		return $cu->put($data);
@@ -143,7 +149,7 @@ class RestSource extends DataSource {
 	*/
 	public function delete(Model $model, $id = null) {
 		$url	= sprintf('/%s/%s', $model->remoteResource, $id);
-		$cu		= new Curl($this->getBaseUrl() . $url);
+		$cu		= new \Nodes\Curl($this->getBaseUrl() . $url);
 		$this->applyConfiguration($cu);
 
 		return $cu->delete();
@@ -180,6 +186,6 @@ class RestSource extends DataSource {
 	* @return void
 	*/
 	public function applyConfiguration(\Nodes\Curl $cu) {
-		//$cu->setOption('headers' );
+		$cu->setOption(CURLOPT_HTTPHEADER, $this->headers);
 	}
 }
