@@ -37,7 +37,12 @@ class RestSource extends DataSource {
 			$data = $pass[1];
 		}
 
-		return call_user_func(array($cu, $method), $data);
+		try {
+			return call_user_func(array($cu, $method), $data);
+		} catch (Exception $e) {
+			CakeLog::error($e);
+			return array();
+		}
 	}
 
 	/**
@@ -64,7 +69,12 @@ class RestSource extends DataSource {
 		$cu = new \Nodes\Curl($this->getBaseUrl() . $url);
 		$this->applyConfiguration($cu);
 
-		return call_user_func(array($cu, $method), $data);
+		try {
+			return call_user_func(array($cu, $method), $data);
+		} catch (Exception $e) {
+			CakeLog::error($e);
+			return array();
+		}
 	}
 
 	/**
@@ -110,16 +120,20 @@ class RestSource extends DataSource {
 			$url .= '?' . http_build_query($queryData['conditions']);
 		}
 
-		$cu = new \Nodes\Curl($url);
-		$this->applyConfiguration($cu);
+		try {
+			$cu = new \Nodes\Curl($url);
+			$this->applyConfiguration($cu);
 
-		$data = $cu->get()->getResponseBody();
+			$data = $cu->get()->getResponseBody();
 
-		if (empty($data['success'])) {
+			if (empty($data['success'])) {
+				return array();
+			}
+			return $data['data'];
+		} catch (Exception $e) {
+			CakeLog::error($e);
 			return array();
 		}
-
-		return $data['data'];
 	}
 
 	/**
@@ -137,7 +151,12 @@ class RestSource extends DataSource {
 		$cu		= new \Nodes\Curl($this->getBaseUrl() . $url);
 		$this->applyConfiguration($cu);
 
-		return $cu->put($data);
+		try {
+			return $cu->put($data);
+		} catch (Exception $e) {
+                        CakeLog::error($e);
+                        return array();
+                }
 	}
 
 	/**
@@ -152,7 +171,12 @@ class RestSource extends DataSource {
 		$cu		= new \Nodes\Curl($this->getBaseUrl() . $url);
 		$this->applyConfiguration($cu);
 
-		return $cu->delete();
+		try {
+			return $cu->delete();
+		} catch (Exception $e) {
+                        CakeLog::error($e);
+                        return array();
+                }
 	}
 
 	/**
