@@ -186,7 +186,7 @@ class RestSource extends DboSource {
 			return $response['data'];
 		} catch (Exception $e) {
 			if ($this->fullDebug) {
-				$this->logQuery($url, $data);
+				$this->logQuery($url, $queryData);
 			}
 
 			CakeLog::error($e);
