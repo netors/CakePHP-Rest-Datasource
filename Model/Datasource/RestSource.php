@@ -176,7 +176,8 @@ class RestSource extends DboSource {
 
 			if ($this->fullDebug) {
 				$this->took = round((microtime(true) - $t) * 1000, 0);
-				$this->numRows = $this->affected = $response['data'] ? count(current($response['data'])) : 0;
+				$current = current($response['data']);
+				$this->numRows = $this->affected = $response['data'] ? count($current) : 0;
 				$this->logQuery($url, $queryData);
 			}
 
@@ -268,6 +269,10 @@ class RestSource extends DboSource {
 * @return void
 */
 	public function applyConfiguration(\Nodes\Curl $cu) {
+		$check = array_map(function($h) { return current(explode(':', $h)); }, $this->headers);
+		if (!in_array('X-Authorization', $check)) {
+			throw new InternalErrorException('No API token provided');
+		}
 		$cu->setOption(CURLOPT_HTTPHEADER, $this->headers);
 	}
 }
