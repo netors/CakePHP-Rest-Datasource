@@ -176,7 +176,7 @@ class RestSource extends DboSource {
 
 			if ($this->fullDebug) {
 				$this->took = round((microtime(true) - $t) * 1000, 0);
-				$current = current($response['data']);
+				$current = is_array($response['data']) ? current($response['data']) : array();
 				$this->numRows = $this->affected = $response['data'] ? count($current) : 0;
 				$this->logQuery($url, $queryData);
 			}
