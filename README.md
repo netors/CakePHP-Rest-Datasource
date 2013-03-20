@@ -8,6 +8,8 @@ CakePlugin::load('Rest');
 ?>
 ```
 
+Depends on: https://github.com/nodesagency/Platform-Common-Plugin
+
 ## Database config
 
 ```php
